@@ -1,12 +1,4 @@
-
-
-
-
-use std::{
-    error::Error,
-    io,
-    time::Duration,
-};
+use std::{error::Error, io, time::Duration};
 
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -34,8 +26,12 @@ pub fn run_tui(save_points: &mut SavePoints) -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // Application state: a vector of path strings and a selected index.
-    let mut paths: Vec<_> = 
-        save_points.memories.iter().flat_map(|path| path.to_str()).collect();
+    let mut paths: Vec<_> = save_points
+        .memories
+        .iter()
+        .flat_map(|path| path.to_str())
+        .map(|p| p.to_owned())
+        .collect();
     let mut selected: usize = 0;
 
     // Run the main application loop.
@@ -50,38 +46,56 @@ pub fn run_tui(save_points: &mut SavePoints) -> Result<(), Box<dyn Error>> {
     )?;
     terminal.show_cursor()?;
 
-    if let Err(err) = app_result {
-        println!("Application error: {:?}", err);
+    match app_result {
+
+       Err(err)  => eprintln!("Application error: {:?}", err),
+       Ok(comm) if comm == Command::Close => {
+           todo!(); // This should call the SavePoints save memory function but that requires
+                    // the path to save to at the moment which ideally should be bound to the
+                    // instance of SavePoints is not atm as such is not passed to the run_tui
+                    // function. Need a way of getting that path here, adding it as a field to
+                    // SavePoints may require more bespoke Serde serialisation to ensure the save
+                    // and load methods still work and dont serialsied uneccessary data?
+           
+
+       }, // receive Close command, save SavePoint
+        _ => (),
     }
     Ok(())
 }
 
+#[derive(Debug, PartialEq, Eq)]
+enum Command {
+    Close,
+}
+
 /// Runs the application event loop.
-/// 
+///
 /// * `terminal` - a mutable reference to the Terminal.
 /// * `paths` - a mutable reference to the vector of paths.
 /// * `selected` - a mutable reference to the index of the currently selected path.
 fn run_app<B: Backend>(
     terminal: &mut Terminal<B>,
-    paths: &mut Vec<&str>,
+    paths: &mut Vec<String>,
     selected: &mut usize,
-) -> io::Result<()> {
+) -> io::Result<Command> { // return the Command to propogate closing functions, save etc
     loop {
         // Render the UI on each iteration.
         terminal.draw(|f| {
             let size = f.size();
 
             // Create a list of ListItem widgets from the vector of paths.
-            let items: Vec<ListItem> = paths
-                .iter()
-                .map(|p| ListItem::new(p.to_owned()))
-                .collect();
+            let items: Vec<ListItem> = paths.iter().map(|p| ListItem::new(p.to_string())).collect();
 
             // Set up the list widget with a border, title, and a highlight symbol.
             let list = List::new(items)
                 .block(Block::default().borders(Borders::ALL).title("Paths"))
                 .highlight_symbol(">> ")
-                .highlight_style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD));
+                .highlight_style(
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                );
 
             // Maintain the state (selected index) of the list.
             let mut state = ListState::default();
@@ -97,7 +111,7 @@ fn run_app<B: Backend>(
             if let Event::Key(key_event) = event::read()? {
                 match key_event.code {
                     // Quit on 'q'
-                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Char('q') => return Ok(Command::Close),
 
                     // Navigate down on 'j'
                     KeyCode::Char('j') => {
@@ -125,4 +139,3 @@ fn run_app<B: Backend>(
         }
     }
 }
-

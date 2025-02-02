@@ -5,7 +5,11 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug,Deserialize,Serialize,Default)]
 pub struct SavePoints {
-    pub memories: Vec<PathBuf>,
+     memories: Vec<PathBuf>,
+}
+
+pub fn get_current_path() -> std::io::Result<PathBuf> {
+    std::env::current_dir()
 }
 
 impl SavePoints {
@@ -16,8 +20,22 @@ impl SavePoints {
 
 
     }
-    /// start a SavePoints instance from a prepopulated path
-    pub fn init<T: AsRef<Path>>(save_path: T) {
+    /// start a SavePoints instance from a path to a directory to create file into
+    pub fn init<T: AsRef<Path>>(save_path: T) -> std::io::Result<Self> {
+        // save_path is the directory path
+
+        let mut file_path = save_path.as_ref().to_path_buf();
+        file_path.extend(["memories.json"]);
+        
+        // Load memories from file if it exists
+        match Self::load_memory(&file_path) { // file path is the memory file
+            Ok(instance) => Ok(instance),
+            Err(e) => {
+                eprintln!("Failed to load from memory path, or not path, creating new instance");
+                Ok(Self::new())
+            }
+        }
+        
 
 
     }

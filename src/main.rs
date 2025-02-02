@@ -1,4 +1,5 @@
 use dirs::home_dir;
+use save_point::SavePoints;
 use std::error::Error;
 use std::fs::{create_dir, create_dir_all};
 use std::io::ErrorKind;
@@ -9,7 +10,13 @@ use save_point::tui::run_tui;
 fn main() -> Result<(), Box<dyn Error>> {
     let store_path = setup_location_store()?;
 
-    run_tui();
+    let mut store = SavePoints::init(&store_path)?;
+
+
+
+
+
+    _ = run_tui(&mut store);
 
     
 
@@ -20,9 +27,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 // 1. Get current path "pwd"
 //
 
-fn get_current_path() -> std::io::Result<PathBuf> {
-    std::env::current_dir()
-}
 
 /// Initialises the save point directory
 fn setup_location_store() -> Result<PathBuf, Box<dyn Error>> {
@@ -47,7 +51,7 @@ fn setup_location_store() -> Result<PathBuf, Box<dyn Error>> {
             // Not a dir? create it
             Ok(_) => {}
             Err(e) if e.kind() == ErrorKind::NotFound => {
-                dbg!("Uhoh no parent");
+                dbg!("Parent Directory Missing");
             }
 
             _ => (),
