@@ -1,4 +1,5 @@
 
+pub mod tui;
 use std::{error::Error, fs::{File}, io::Write, path::{Path, PathBuf}};
 use serde::{Serialize, Deserialize};
 
@@ -16,7 +17,7 @@ impl SavePoints {
 
     }
     /// start a SavePoints instance from a prepopulated path
-    pub fn init<T: AsRef<Path>>(path: T) {
+    pub fn init<T: AsRef<Path>>(save_path: T) {
 
 
     }

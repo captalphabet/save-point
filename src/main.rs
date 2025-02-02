@@ -4,9 +4,14 @@ use std::fs::{create_dir, create_dir_all};
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::str::FromStr;
+use save_point::tui::run_tui;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let store_path = setup_location_store()?;
+
+    run_tui();
+
+    
 
     Ok(())
 }
