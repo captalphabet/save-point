@@ -50,12 +50,14 @@ pub fn run_tui(save_points: &mut SavePoints) -> Result<(), Box<dyn Error>> {
 
        Err(err)  => eprintln!("Application error: {:?}", err),
        Ok(comm) if comm == Command::Close => {
-           todo!(); // This should call the SavePoints save memory function but that requires
+            // This should call the SavePoints save memory function but that requires
                     // the path to save to at the moment which ideally should be bound to the
                     // instance of SavePoints is not atm as such is not passed to the run_tui
                     // function. Need a way of getting that path here, adding it as a field to
                     // SavePoints may require more bespoke Serde serialisation to ensure the save
                     // and load methods still work and dont serialsied uneccessary data?
+
+            save_points.save_to_self_path()?;
            
 
        }, // receive Close command, save SavePoint
