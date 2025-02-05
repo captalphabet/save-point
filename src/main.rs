@@ -40,7 +40,6 @@ fn setup_location_store() -> Result<PathBuf, Box<dyn Error>> {
                                  // if SAVEPOINT_SAV_DIR env variable not set
     };
 
-    dbg!(&store_path);
 
     // Test path exists or not
     //

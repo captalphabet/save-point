@@ -1,6 +1,6 @@
 
 pub mod tui;
-use std::{error::Error, fs::{File}, io::Write, path::{Path, PathBuf}};
+use std::{error::Error, fs::File, io::{ErrorKind, Write}, path::{Path, PathBuf}};
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug,Deserialize,Serialize,Default)]
@@ -30,7 +30,9 @@ impl SavePoints {
         
         // Load memories from file if it exists
         match Self::load_memory(&file_path) { // file path is the memory file
-            Ok(instance) => Ok(instance),
+            Ok(instance) => {
+                Ok(instance)
+            },
             Err(e) => {
                 eprintln!("Failed to load from memory path, or not path, creating new instance: {e}");
                 let new_conf = SavePoints {
@@ -55,7 +57,8 @@ impl SavePoints {
     /// saves a path to file
     pub fn save_memory<T: AsRef<Path>>(&self, path: T) -> std::io::Result<()> {
         let mut save_path = path.as_ref().to_path_buf();
-        save_path.extend(["memories.json"]);
+        // save_path.extend(["memories.json"]);
+
         let json = serde_json::to_string(&self.memories)?;
         let mut file = File::create(&save_path)?;
         file.write_all(json.as_bytes())?;
@@ -77,16 +80,23 @@ impl SavePoints {
     /// loads memorised paths from file
     /// will fail if load is called before any file actually exists
     pub fn load_memory<T: AsRef<Path>>(path: T) -> std::io::Result<Self> {
-        let json = std::fs::read_to_string(path.as_ref())?;
+        let path = path.as_ref();
+        if path.exists() {
+        let json = std::fs::read_to_string(path)?;
         let save_points = SavePoints {
             
             memories: serde_json::from_str(&json)?,
-            memory_path: path.as_ref().to_owned()
+            memory_path: path.to_owned()
         };
+        
         
 
 
         Ok(save_points)
+        }
+        else {
+            Err(std::io::Error::new(ErrorKind::NotFound, "file does not exist"))
+        }
     }
 }
 
