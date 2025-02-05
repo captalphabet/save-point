@@ -67,7 +67,7 @@ pub fn run_tui(save_points: &mut SavePoints) -> Result<(), Box<dyn Error>> {
         } // receive Close command, save SavePoint
         Ok(comm) if comm != Command::Close => {
             if let Command::ExitPath(exit_path_string) = comm {
-                dbg!("Creating path file");
+                // dbg!("Creating path file");
                 let mut temp_path = save_points.memory_path.parent().map(|path| path.to_path_buf()).unwrap(); // should only fail if
                                                                            // memory path was not
                                                                            // defined is somehow
