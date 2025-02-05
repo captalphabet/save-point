@@ -33,6 +33,7 @@ fn setup_location_store() -> Result<PathBuf, Box<dyn Error>> {
     let mut default_home_config = home_dir().expect("failed to Retrieve OS HOME");
     default_home_config.extend([".config","save-point"].iter());
 
+
     let store_path = match std::env::var("SAVEPOINT_SAVE_DIR") {
         // Define store directory from ENV varible or from default
         Ok(path_string) => PathBuf::from_str(&path_string)?,

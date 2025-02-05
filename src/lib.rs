@@ -36,7 +36,8 @@ impl SavePoints {
             Err(e) => {
                 eprintln!("Failed to load from memory path, or not path, creating new instance: {e}");
                 let new_conf = SavePoints {
-                    memory_path: file_path.parent().unwrap().to_path_buf(),
+                    memory_path: file_path.to_path_buf(), // ensures points to the memories.json
+                                                          // file in .config/save-point/
                     ..Default::default()
 
                 };
@@ -56,7 +57,7 @@ impl SavePoints {
     }
     /// saves a path to file
     pub fn save_memory<T: AsRef<Path>>(&self, path: T) -> std::io::Result<()> {
-        let mut save_path = path.as_ref().to_path_buf();
+        let save_path = path.as_ref().to_path_buf();
         // save_path.extend(["memories.json"]);
 
         let json = serde_json::to_string(&self.memories)?;

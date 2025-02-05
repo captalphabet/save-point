@@ -67,12 +67,24 @@ pub fn run_tui(save_points: &mut SavePoints) -> Result<(), Box<dyn Error>> {
         } // receive Close command, save SavePoint
         Ok(comm) if comm != Command::Close => {
             if let Command::ExitPath(exit_path_string) = comm {
+                dbg!("Creating path file");
+                let mut temp_path = save_points.memory_path.parent().map(|path| path.to_path_buf()).unwrap(); // should only fail if
+                                                                           // memory path was not
+                                                                           // defined is somehow
+                                                                           // root
+                temp_path.extend(["_path.temp"].iter());
                 let mut file =
-                    File::create("./_path.temp").expect("failed to create temp path file"); // I have decided the best way would be to run a script in the current shell and hopefully the tui works and save the target path to a file
-                                                                                            // THis is then read in the script as a cd target, before removing the temp file
+                    File::create(&temp_path).expect("failed to create temp path file"); // I have decided the best way would be to run a script in the current shell and hopefully the tui works and save the target path to a file
+                // THis is then read in the script as a cd target, before removing the temp file
+                // Will need to ensure script points to this standardised path, perhaps a method to
+                // print the config file into the script?
 
                 let formed_args = exit_path_string.as_str();
-                _ = write!(&mut file, "{}", formed_args);
+                match write!(&mut file, "{}", formed_args) {
+                    Ok(_) => (),
+                    Err(e) => {eprintln!("Error: {e}")}
+
+                }
             }
         }
         _ => (),
