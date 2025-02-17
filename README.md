@@ -11,3 +11,14 @@ will need to store persistence between uses, perhaps just saving to a configured
   - This enables the parent shell to automatically get access to processes temp file/clean up
 - Add to ~/.bashrc (or other config on boot etc) a function that souces save-point.sh to enable folder changes
 
+```bash
+sv() {
+  source save-point.sh
+}
+
+```
+
+add this to .bashrc
+
+
+

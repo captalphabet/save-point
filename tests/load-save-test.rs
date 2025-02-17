@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
-    
+
+    use save_point::SavePoints;
     use std::fs::{self, File};
     use std::io::{self, Write};
-    use std::path::{PathBuf, Path};
-    use save_point::SavePoints;
+    use std::path::{Path, PathBuf};
 
     #[test]
     fn test_new_savepoints() {
@@ -25,6 +25,7 @@ mod tests {
     fn test_save_memory() -> io::Result<()> {
         let save_points = SavePoints {
             memories: vec![PathBuf::from("example/path1")],
+            memory_path: PathBuf::new(),
         };
         let temp_file = "temp_save.json";
         save_points.save_memory(Path::new(temp_file))?;
@@ -41,11 +42,15 @@ mod tests {
         let temp_file = "temp_load.json";
         let save_points = SavePoints {
             memories: vec![PathBuf::from("example/path2")],
+            memory_path: PathBuf::new(),
         };
         save_points.save_memory(Path::new(temp_file))?;
         let loaded_save_points = SavePoints::load_memory(Path::new(temp_file))?;
         assert_eq!(loaded_save_points.memories.len(), 1);
-        assert_eq!(loaded_save_points.memories[0], PathBuf::from("example/path2"));
+        assert_eq!(
+            loaded_save_points.memories[0],
+            PathBuf::from("example/path2")
+        );
         fs::remove_file(temp_file)?;
         Ok(())
     }
